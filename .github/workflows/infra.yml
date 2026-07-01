@@ -1,0 +1,59 @@
+name: Deploy Infrastructure
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'infra/**'
+  push:
+    branches: [main]
+    paths:
+      - 'infra/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  what-if:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    name: Bicep What-If
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: What-If
+        run: |
+          az deployment group what-if \
+            --resource-group rg-azureresume \
+            --template-file infra/main.bicep \
+            --parameters infra/main.bicepparam
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: Deploy Bicep
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy
+        run: |
+          az deployment group create \
+            --resource-group rg-azureresume \
+            --template-file infra/main.bicep \
+            --parameters infra/main.bicepparam
