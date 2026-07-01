@@ -126,6 +126,14 @@ a:hover {
   align-items: center;
 }
 
+/* Grid items default to min-width: auto, which uses their content's
+   intrinsic size as a floor -- without this, .terminal's `width: 420px`
+   (see below) forces the whole row wider than the viewport on mobile,
+   overriding its own `max-width: 100%`. */
+.hero-grid > * {
+  min-width: 0;
+}
+
 .eyebrow {
   color: var(--c-text-muted);
   font-size: 0.88rem;
@@ -457,8 +465,18 @@ section {
 
 .footer-links {
   display: flex;
-  gap: 1.1rem;
-  font-size: 0.78rem;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-links a {
+  display: inline-flex;
+  color: var(--c-text-muted);
+}
+
+.footer-links a:hover {
+  color: var(--c-accent);
+  text-decoration: none;
 }
 
 @media (max-width: 760px) {
@@ -468,6 +486,10 @@ section {
 
   .hero-grid {
     grid-template-columns: 1fr;
+  }
+
+  .terminal {
+    width: 100%;
   }
 
   .hero h1 {
@@ -481,5 +503,9 @@ section {
 
   .project-num {
     display: none;
+  }
+
+  .project-tags {
+    white-space: normal;
   }
 }
