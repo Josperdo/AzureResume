@@ -1,4 +1,5 @@
 import json
+import os
 from unittest.mock import MagicMock, patch
 
 import azure.functions as func
@@ -42,6 +43,19 @@ def test_get_count_creates_counter_on_first_run():
     assert json.loads(response.get_body()) == {"count": 1}
     mock_container.upsert_item.assert_called_once_with(
         {"id": "visitor-count", "count": 1}
+    )
+
+
+def test_get_count_sets_allowed_origin_from_env():
+    mock_container = MagicMock()
+    mock_container.patch_item.return_value = {"id": "visitor-count", "count": 7}
+
+    with patch.object(function_app, "_get_container", return_value=mock_container), \
+         patch.dict(os.environ, {"ALLOWED_ORIGIN": "https://lemon-beach-0e1deb90f.7.azurestaticapps.net"}):
+        response = function_app.get_count(_request())
+
+    assert response.headers["Access-Control-Allow-Origin"] == (
+        "https://lemon-beach-0e1deb90f.7.azurestaticapps.net"
     )
 
 

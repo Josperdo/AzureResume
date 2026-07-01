@@ -44,6 +44,11 @@ resource functionAppSettings 'Microsoft.Web/staticSites/config@2022-09-01' = {
   name: 'functionappsettings'
   properties: {
     COSMOS_CONNECTION_STRING: primaryConnectionString.connectionString
+    // Defense-in-depth only -- the real call path is same-origin through the
+    // SWA proxy, so this never gates normal traffic. Derived from the
+    // resource's own hostname rather than hardcoded so it can't drift from
+    // the actual deployed site. See function_app.py's _allowed_origin().
+    ALLOWED_ORIGIN: 'https://${staticSite.properties.defaultHostname}'
   }
 }
 

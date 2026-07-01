@@ -34,7 +34,7 @@ flowchart LR
         SWA -->|"/api/* same-origin proxy"| Func
     end
 
-    subgraph CICD["CI/CD (Day 3)"]
+    subgraph CICD["CI/CD"]
         direction TB
         GHA["GitHub Actions"]
         WhatIf["Bicep what-if + gated deploy"]
