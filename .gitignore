@@ -1,0 +1,51 @@
+# --- Local-only planning / instruction files (not for public repo) ---
+Claude.md
+Security.md
+ROADMAP.md
+tasks/lessons.md
+tasks/
+
+# --- Resume content source-of-truth (private working file; site HTML is generated from it) ---
+resume-source.json
+
+# --- Claude Code local config (machine-specific, not for sharing) ---
+.claude/settings.local.json
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+
+# --- Editor/IDE ---
+.vscode/
+.idea/
+
+# --- Azure / Functions / IaC local artifacts ---
+local.settings.json
+*.env
+.env
+.env.*
+bin/
+obj/
+.azure/
+*.publishsettings
+*.PublishSettings
+
+# --- Python ---
+__pycache__/
+*.pyc
+.python_packages/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# --- Node (kept in case tooling needs it, e.g. SWA CLI) ---
+node_modules/
+
+# --- IaC state (defensive default; not currently used by this project) ---
+.terraform/
+*.tfstate
+*.tfstate.*
+*.bicepparam.local
