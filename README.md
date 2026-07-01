@@ -1,6 +1,6 @@
-# Azure Resume Challenge
+# Azure Resume
 
-My build of the [Cloud Resume Challenge](https://cloudresumechallenge.dev/docs/the-challenge/azure/) on Azure — a personal resume/portfolio site that doubles as a hands-on cloud and security engineering case study. It integrates Azure Static Web Apps, Azure Functions, and Cosmos DB behind a serverless Python API, with every resource defined as Bicep Infrastructure-as-Code and deployed through a GitHub Actions CI/CD pipeline. The build is as much about the decisions as the demo: documenting a real cost-vs-security trade-off (see [Why these choices](#why-these-choices)) rather than defaulting to the most expensive, most locked-down option available.
+A personal resume/portfolio site that doubles as a hands-on cloud and security engineering case study. It integrates Azure Static Web Apps, Azure Functions, and Cosmos DB behind a serverless Python API, with every resource defined as Bicep Infrastructure-as-Code and deployed through a GitHub Actions CI/CD pipeline. The build is as much about the decisions as the demo: documenting a real cost-vs-security trade-off (see [Why these choices](#why-these-choices)) rather than defaulting to the most expensive, most locked-down option available.
 
 **Live site:** _not deployed yet_
 **Status:** in progress — infrastructure is live in Azure; frontend/API code deployment and CI/CD are next.
