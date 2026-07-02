@@ -13,7 +13,8 @@ A personal resume/portfolio site that doubles as a hands-on cloud and security e
 - **Visitor Tracking** — a serverless backend (Azure Functions, Python + Cosmos DB) tracks and serves a live visitor count via `GET /api/count`.
 - **Infrastructure as Code** — Bicep provisions and manages every Azure resource; nothing was created through the Portal. Deployed and verified against a live resource group.
 - **Secret-Free by Design** — the Cosmos DB connection string is resolved live at deploy time and injected directly into the Function App's settings. It never exists in git, a GitHub secret, or a parameter file.
-- **CI/CD Pipeline** _(in progress)_ — GitHub Actions will deploy the frontend and API together on push to `main`, plus a gated Bicep pipeline for infrastructure changes.
+- **CI/CD Pipeline** — GitHub Actions deploys the frontend and API together on push to `main`, plus a separate Bicep `what-if`/deploy pipeline for infrastructure changes.
+- **Custom Domain** — `josperdo.com` (apex), validated via DNS TXT token and bound to the Static Web App, with `www.josperdo.com` redirecting to the apex.
 
 ## Architecture
 
@@ -37,7 +38,7 @@ flowchart LR
     subgraph CICD["CI/CD"]
         direction TB
         GHA["GitHub Actions"]
-        WhatIf["Bicep what-if + gated deploy"]
+        WhatIf["Bicep what-if + deploy"]
         GHA -->|"deploy.yml"| SWA
         GHA -->|"infra.yml"| WhatIf
     end
@@ -56,7 +57,7 @@ The connection string flowing from Cosmos DB into the Function is resolved live 
 | IaC | Bicep |
 | CI/CD | GitHub Actions — one workflow deploys frontend + API together, a second handles Bicep `what-if`/deploy |
 
-**Budget:** targeting ~$20-25/year, essentially all of it just custom domain registration.
+**Budget:** ~$20-25/year, essentially all of it the custom domain registration (Cloudflare Registrar) — everything else runs on Azure free tiers.
 
 ## Why these choices
 
@@ -100,12 +101,13 @@ The connection string flowing from Cosmos DB into the Function is resolved live 
 └── docs/
     ├── architecture.md
     └── decisions/
+        └── README.md
 ```
 
 ## Explanation of Directories and Files
 
-- **`.github/workflows/`** — GitHub Actions definitions. `deploy.yml` deploys the frontend and Python API together; `infra.yml` runs a Bicep `what-if` diff on pull requests and a gated deploy on merge to `main`.
-- **`infra/`** — Bicep IaC. `main.bicep` orchestrates the `cosmos.bicep` (account, database, container, free tier) and `staticWebApp.bicep` (Static Web App + the connection-string app setting) modules. `monitoring.bicep` is a Phase 2 stub, not yet wired in.
+- **`.github/workflows/`** — GitHub Actions definitions. `deploy.yml` deploys the frontend and Python API together; `infra.yml` runs a Bicep `what-if` diff on pull requests and deploys on merge to `main` via GitHub OIDC (no static secret) — see [docs/decisions](docs/decisions/README.md) #5 for why the manual-approval reviewer gate was evaluated and deliberately dropped.
+- **`infra/`** — Bicep IaC. `main.bicep` orchestrates the `cosmos.bicep` (account, database, container, free tier) and `staticWebApp.bicep` (Static Web App + the connection-string and CORS-origin app settings) modules. `monitoring.bicep` is a Phase 2 stub, not yet wired in.
 - **`src/frontend/`** — the static resume site: plain HTML/CSS/JS, no framework.
 - **`src/api/`** — the Python Azure Functions API (`function_app.py`) that reads/increments the visitor counter.
 - **`tests/`** — pytest unit tests for the API, with a mocked Cosmos client.
@@ -125,9 +127,9 @@ The frontend calls `/api/count` as a relative path, proxied same-origin through 
 Technology: Bicep
 Every resource — the Cosmos DB account, database, container, and the Static Web App — is defined in Bicep and deployed via `az deployment group create`. No resource was created through the Portal.
 
-**4. CI/CD Pipeline** _(in progress)_
+**4. CI/CD Pipeline**
 Technology: GitHub Actions
-One workflow deploys the frontend and API together on push to `main`; a second runs a Bicep `what-if` diff on pull requests and requires manual approval before deploying infrastructure changes.
+One workflow deploys the frontend and API together on push to `main`; a second runs a Bicep `what-if` diff on pull requests and deploys infrastructure changes on merge, authenticating via GitHub OIDC federated credentials rather than a stored secret.
 
 **5. Secret Handling**
 Technology: Bicep `listConnectionStrings()`
@@ -151,12 +153,12 @@ pytest tests/
 
 ## Security considerations
 
-- CORS is same-origin by design (the frontend calls `/api/*` as a relative path through the Static Web App's proxy), with an explicit origin lock as defense-in-depth.
-- Infrastructure changes go through a `what-if` diff on every pull request and a manual approval gate before deploying to the live resource group.
+- CORS is same-origin by design (the frontend calls `/api/*` as a relative path through the Static Web App's proxy), with an explicit origin lock as defense-in-depth — the allowed origin is derived from the SWA resource's own hostname in Bicep, not hardcoded.
+- Infrastructure changes go through a `what-if` diff on every pull request before merge, so the exact resource delta is visible ahead of any apply.
+- See the [architecture decision records](docs/decisions/README.md) for the full list of deliberate trade-offs, including the ones that weren't free.
 
 ## Future Improvements
 
-- Add a custom domain (Free tier supports up to 2)
 - Wire up Application Insights for monitoring
 - Expand automated test coverage
 - Publish the write-up blog post
