@@ -1,5 +1,9 @@
 # Azure Resume
 
+![Deploy](https://github.com/Josperdo/AzureResume/actions/workflows/deploy.yml/badge.svg)
+![License](https://img.shields.io/github/license/Josperdo/AzureResume)
+![Last Commit](https://img.shields.io/github/last-commit/Josperdo/AzureResume)
+
 A personal resume/portfolio site that doubles as a hands-on cloud and security engineering case study. It integrates Azure Static Web Apps, Azure Functions, and Cosmos DB behind a serverless Python API, with every resource defined as Bicep Infrastructure-as-Code and deployed through a GitHub Actions CI/CD pipeline. The build is as much about the decisions as the demo: documenting a real cost-vs-security trade-off (see [Why these choices](#why-these-choices)) rather than defaulting to the most expensive, most locked-down option available.
 
 **Live site:** [josperdo.com](https://josperdo.com)
@@ -161,7 +165,6 @@ pytest tests/
 
 - Wire up Application Insights for monitoring
 - Expand automated test coverage
-- Publish the write-up blog post
 
 ## License
 
